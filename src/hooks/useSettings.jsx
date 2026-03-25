@@ -4,13 +4,19 @@ import api from '../services/api';
 export const useSettings = () => {
   const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const fetchSettings = async () => {
     try {
+      // Settings endpoint is now public, no auth required
       const { data } = await api.get('/settings');
       setSettings(data);
-    } catch (error) {
-      console.error('Failed to fetch settings', error);
+      setError(null);
+    } catch (err) {
+      console.error('Failed to fetch settings:', err);
+      setError(err.response?.data?.message || 'Failed to load settings');
+      // Don't throw - settings are optional for some pages
+      setSettings(null);
     } finally {
       setLoading(false);
     }
@@ -30,5 +36,5 @@ export const useSettings = () => {
     fetchSettings();
   }, []);
 
-  return { settings, loading, updateSettings, refresh: fetchSettings };
+  return { settings, loading, error, updateSettings, refresh: fetchSettings };
 };

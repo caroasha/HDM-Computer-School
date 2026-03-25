@@ -14,30 +14,47 @@ export const FeeStructureModal = ({ isOpen, onClose }) => {
   }, [settings]);
 
   const getHTMLContent = () => {
+    const schoolName = settings?.schoolName || 'HDM Computer School';
+    const motto = settings?.motto || 'Technology for Tomorrow';
+    const address = settings?.address || '';
+    const phone = settings?.phone || '';
+    const email = settings?.email || '';
+    const now = new Date();
+
     const tableRows = courses.map(c => `
       <tr>
-        <td>${c.name}</td>
-        <td>${c.durationMonths} months</td>
-        <td>${formatCurrency(c.totalFee)}</td>
+        <td style="padding: 12px; border: 1px solid #ddd;">
+          <strong>${c.name}</strong>
+          ${c.description ? `<br/><span style="font-size: 12px; color: #666;">${c.description}</span>` : ''}
+        </td>
+        <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">${c.durationMonths} months</td>
+        <td style="padding: 12px; border: 1px solid #ddd; text-align: right;">${formatCurrency(c.totalFee)}</td>
       </tr>
     `).join('');
 
-    const now = new Date();
-
     return `
+      <h1>${schoolName}</h1>
+      <p style="text-align: center; font-style: italic;">${motto}</p>
+      <p style="text-align: center;">${address}</p>
+      <p style="text-align: center;">📞 ${phone} | ✉️ ${email}</p>
+      <hr/>
       <h2>FEE STRUCTURE</h2>
       <p>Effective from: ${now.toLocaleDateString()}</p>
-      <table>
+      <table style="width:100%; border-collapse: collapse; margin-top:20px;">
         <thead>
-          <tr>
-            <th>Course</th>
-            <th>Duration</th>
-            <th>Total Fee (KES)</th>
+          <tr style="background:#f2f2f2;">
+            <th style="padding:12px; border:1px solid #ddd; text-align:left;">Course</th>
+            <th style="padding:12px; border:1px solid #ddd; text-align:center;">Duration</th>
+            <th style="padding:12px; border:1px solid #ddd; text-align:right;">Total Fee (KES)</th>
           </tr>
         </thead>
         <tbody>${tableRows}</tbody>
       </table>
-      <p style="margin-top: 20px;"><strong>Note:</strong> Fees are payable in installments as per the payment schedule.</p>
+      <div class="footer">
+        <p><strong>${schoolName}</strong> | ${address}</p>
+        <p>Printed: ${now.toLocaleString()}</p>
+        <p>${motto}</p>
+      </div>
     `;
   };
 
@@ -72,20 +89,16 @@ export const FeeStructureModal = ({ isOpen, onClose }) => {
     <Modal isOpen={isOpen} onClose={onClose} title="Fee Structure">
       <div className="max-h-96 overflow-auto">
         {courses.length === 0 ? (
-          <p className="text-gray-500">No courses configured yet.</p>
+          <p className="text-gray-500 text-center py-8">No courses configured yet.</p>
         ) : (
           <table className="min-w-full">
             <thead className="bg-gray-50">
-              <tr>
-                <th className="p-2 text-left">Course</th>
-                <th className="p-2 text-left">Duration</th>
-                <th className="p-2 text-left">Fee (KES)</th>
-              </tr>
+              <tr><th className="p-2 text-left">Course</th><th className="p-2 text-left">Duration</th><th className="p-2 text-left">Fee (KES)</th></tr>
             </thead>
             <tbody>
               {courses.map((c, i) => (
                 <tr key={i} className="border-t">
-                  <td className="p-2">{c.name}</td>
+                  <td className="p-2"><div className="font-medium">{c.name}</div>{c.description && <div className="text-xs text-gray-500">{c.description}</div>}</td>
                   <td className="p-2">{c.durationMonths} months</td>
                   <td className="p-2">{formatCurrency(c.totalFee)}</td>
                 </tr>

@@ -28,7 +28,6 @@ export const Dashboard = () => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        // Fetch all data in parallel
         const [studentsRes, employeesRes, inventoryRes, feesRes, applicationsRes, transactionsRes] = await Promise.all([
           api.get('/students'),
           api.get('/employees'),
@@ -45,20 +44,9 @@ export const Dashboard = () => {
         const applications = applicationsRes.data;
         const transactions = transactionsRes.data;
 
-        // Calculate inventory total value
         const inventoryValue = inventory.reduce((sum, i) => sum + (i.value || 0), 0);
-
-        // Calculate total fees collected
         const feesCollected = fees.reduce((sum, f) => sum + f.amount, 0);
-
-        // Count applications
         const pendingApps = applications.filter(a => a.status === 'pending').length;
-
-        // Get recent applications (last 5)
-        const recentApps = applications.slice(0, 5);
-
-        // Get recent transactions (last 5)
-        const recentTx = transactions.slice(0, 5);
 
         setStats({
           students: students.length,
@@ -68,8 +56,8 @@ export const Dashboard = () => {
           applications: applications.length,
           pendingApplications: pendingApps
         });
-        setRecentApplications(recentApps);
-        setRecentTransactions(recentTx);
+        setRecentApplications(applications.slice(0, 5));
+        setRecentTransactions(transactions.slice(0, 5));
       } catch (err) {
         console.error('Error fetching dashboard data:', err);
       } finally {
@@ -249,10 +237,8 @@ export const Dashboard = () => {
         )}
       </div>
 
-      {/* Fee Structure Modal */}
+      {/* Modals */}
       <FeeStructureModal isOpen={feeModalOpen} onClose={() => setFeeModalOpen(false)} />
-      
-      {/* Brochure Modal */}
       <BrochureModal isOpen={brochureModalOpen} onClose={() => setBrochureModalOpen(false)} />
     </div>
   );

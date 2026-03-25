@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useSettings } from '../hooks/useSettings';
 import { Modal } from './Modal';
 import { Button } from './Button';
@@ -10,22 +9,35 @@ export const BrochureModal = ({ isOpen, onClose }) => {
   const courses = settings?.courses || [];
 
   const getHTMLContent = () => {
+    const schoolName = settings?.schoolName || 'HDM Computer School';
+    const motto = settings?.motto || 'Technology for Tomorrow';
+    const address = settings?.address || '';
+    const phone = settings?.phone || '';
+    const email = settings?.email || '';
     const now = new Date();
-    
+
     const coursesHtml = courses.map(c => `
       <div style="margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #eee;">
         <h3 style="color: #2f86eb; margin-bottom: 8px;">${c.name}</h3>
+        ${c.description ? `<p style="color: #666; margin-bottom: 8px;">${c.description}</p>` : ''}
         <p><strong>Duration:</strong> ${c.durationMonths} months</p>
         <p><strong>Total Fee:</strong> ${formatCurrency(c.totalFee)}</p>
       </div>
     `).join('');
 
     return `
+      <h1>${schoolName}</h1>
+      <p style="text-align: center; font-style: italic;">${motto}</p>
+      <p style="text-align: center;">${address}</p>
+      <p style="text-align: center;">📞 ${phone} | ✉️ ${email}</p>
+      <hr/>
       <h2>OUR COURSES</h2>
-      <p>Join us today and start your journey to success!</p>
       ${coursesHtml}
-      <p style="margin-top: 20px;"><strong>Contact us for more information:</strong></p>
-      <p>📞 ${settings?.phone || '+254 700 123 456'} | ✉️ ${settings?.email || 'info@hdmcomputerschool.ac.ke'}</p>
+      <div class="footer">
+        <p><strong>${schoolName}</strong> | ${address}</p>
+        <p>Printed: ${now.toLocaleString()}</p>
+        <p>${motto}</p>
+      </div>
     `;
   };
 
@@ -40,13 +52,14 @@ export const BrochureModal = ({ isOpen, onClose }) => {
     <Modal isOpen={isOpen} onClose={onClose} title="School Brochure">
       <div className="max-h-96 overflow-auto">
         {courses.length === 0 ? (
-          <p className="text-gray-500">No courses available.</p>
+          <p className="text-gray-500 text-center py-8">No courses available.</p>
         ) : (
           <div className="space-y-4">
             {courses.map((c, i) => (
               <div key={i} className="border-b pb-3">
                 <h3 className="text-lg font-semibold text-primary">{c.name}</h3>
-                <p className="text-gray-600">{c.durationMonths} months · {formatCurrency(c.totalFee)}</p>
+                {c.description && <p className="text-sm text-gray-600 mt-1">{c.description}</p>}
+                <p className="text-gray-500 text-sm mt-1">{c.durationMonths} months · {formatCurrency(c.totalFee)}</p>
               </div>
             ))}
           </div>

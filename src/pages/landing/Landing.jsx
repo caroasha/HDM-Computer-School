@@ -70,30 +70,32 @@ export const Landing = () => {
         </div>
       </div>
 
-      {/* Courses */}
-      <div id="courses" className="bg-blue-50 py-16">
-        <div className="container mx-auto px-6">
-          <h2 className="text-3xl font-bold text-center text-blue-800 mb-10">Our Courses</h2>
-          <div className="grid md:grid-cols-3 gap-6">
-            {(settings?.courses || []).map((course, idx) => (
-              <div key={idx} className="bg-white p-6 rounded-xl shadow hover:shadow-lg transition">
-                <i className="fas fa-laptop-code text-3xl text-blue-600 mb-3"></i>
-                <h3 className="font-bold text-xl">{course.name}</h3>
-                <p className="text-gray-600 mt-2">
-                  {course.durationMonths} months · {formatCurrency(course.totalFee)}
-                </p>
-                <button
-                  className="mt-4 text-sm text-blue-600 underline hover:text-blue-800"
-                  onClick={() => alert(`Course Details:\n\n${course.name}\nDuration: ${course.durationMonths} months\nFee: ${formatCurrency(course.totalFee)}\n\nContact us to enroll!`)}
-                >
-                  Download details
-                </button>
-              </div>
-            ))}
-          </div>
+   {/* Courses Section */}
+<div id="courses" className="bg-blue-50 py-16">
+  <div className="container mx-auto px-6">
+    <h2 className="text-3xl font-bold text-center text-blue-800 mb-10">Our Courses</h2>
+    <div className="grid md:grid-cols-3 gap-6">
+      {(settings?.courses || []).map((course, idx) => (
+        <div key={idx} className="bg-white p-6 rounded-xl shadow hover:shadow-lg transition">
+          <i className="fas fa-laptop-code text-3xl text-blue-600 mb-3"></i>
+          <h3 className="font-bold text-xl">{course.name}</h3>
+          {course.description && (
+            <p className="text-gray-600 text-sm mt-2">{course.description}</p>
+          )}
+          <p className="text-gray-600 mt-2">
+            {course.durationMonths} months · {formatCurrency(course.totalFee)}
+          </p>
+          <button
+            className="mt-4 text-sm text-blue-600 underline hover:text-blue-800"
+            onClick={() => alert(`Course Details:\n\n${course.name}\n${course.description || ''}\nDuration: ${course.durationMonths} months\nFee: ${formatCurrency(course.totalFee)}\n\nContact us to enroll!`)}
+          >
+            Download details
+          </button>
         </div>
-      </div>
-
+      ))}
+    </div>
+  </div>
+</div>
       {/* Contact */}
       <div id="contact" className="container mx-auto px-6 py-16">
         <h2 className="text-2xl font-bold text-center mb-4">Find Us</h2>

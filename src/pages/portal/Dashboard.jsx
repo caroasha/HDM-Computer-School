@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '../../services/api';
 import { formatCurrency, formatDate, formatShortDate } from '../../utils/formatters';
-import { Button } from '../../components/Button';  // <-- ADD THIS IMPORT
+import { Button } from '../../components/Button';
 import { PrintButton } from '../../components/PrintButton';
 import { printContent } from '../../utils/print';
 import { usePortalAuth } from '../../hooks/useAuth';
@@ -29,19 +29,15 @@ export const PortalDashboard = () => {
 
         const { data } = await api.get('/portal/profile');
         setProfile(data);
-        
         if (data.portalUser.role === 'student' && data.feeSummary) {
           setFees(data.feeSummary.payments || []);
         }
       } catch (err) {
         console.error('Error loading profile:', err);
-        if (err.response?.status === 403) {
-          setError('You are not authorized to access this page. Please login again.');
+        if (err.response?.status === 403 || err.response?.status === 401) {
+          setError('Session expired. Please login again.');
           localStorage.removeItem('portal_token');
           localStorage.removeItem('portal_user');
-          setTimeout(() => logout(), 2000);
-        } else if (err.response?.status === 401) {
-          setError('Session expired. Please login again.');
           setTimeout(() => logout(), 2000);
         } else {
           setError(err.response?.data?.message || 'Failed to load profile');
@@ -50,62 +46,56 @@ export const PortalDashboard = () => {
         setLoading(false);
       }
     };
-    
     fetchData();
   }, [logout]);
 
   const printReceipt = (fee) => {
     const now = new Date();
     const schoolName = settings?.schoolName || 'HDM Computer School';
+    const motto = settings?.motto || 'Technology for Tomorrow';
     const address = settings?.address || '';
+    const phone = settings?.phone || '';
+    const email = settings?.email || '';
+
     const html = `
       <div style="max-width: 600px; margin: 0 auto;">
-        <h1 style="text-align: center; color: #0a2a44; border-bottom: 3px solid #2f86eb;">${schoolName}</h1>
+        <h1>${schoolName}</h1>
+        <p style="text-align: center; font-style: italic;">${motto}</p>
         <p style="text-align: center;">${address}</p>
+        <p style="text-align: center;">📞 ${phone} | ✉️ ${email}</p>
         <hr/>
-        <h2>Fee Receipt</h2>
-        <p><strong>Receipt No:</strong> ${fee.id || fee._id}</p>
-        <p><strong>Student:</strong> ${profile?.userData?.name} (${profile?.portalUser?.regNumber})</p>
-        <p><strong>Date:</strong> ${formatDate(fee.date)}</p>
-        <p><strong>Amount Paid:</strong> ${formatCurrency(fee.amount)}</p>
-        <p><strong>Balance After:</strong> ${formatCurrency(fee.balanceAfter)}</p>
-        ${fee.notes ? `<p><strong>Notes:</strong> ${fee.notes}</p>` : ''}
-        <div style="margin-top: 40px; text-align: center;">
+        <h2>OFFICIAL FEE RECEIPT</h2>
+        
+        <table style="width: 100%; margin: 20px 0;">
+          <tr><td><strong>Receipt No:</strong></td><td>${fee.id || fee._id}</td></tr>
+          <tr><td><strong>Date:</strong></td><td>${formatDate(fee.date)}</td></tr>
+          <tr><td><strong>Student:</strong></td><td>${profile?.userData?.name} (${profile?.portalUser?.regNumber})</td></tr>
+          <tr><td><strong>Amount Paid:</strong></td><td style="font-size: 18px; font-weight: bold; color: #2ecc71;">${formatCurrency(fee.amount)}</td></tr>
+          <tr><td><strong>Balance After:</strong></td><td>${formatCurrency(fee.balanceAfter)}</td></tr>
+          ${fee.notes ? `<tr><td><strong>Notes:</strong></td><td>${fee.notes}</td></tr>` : ''}
+        </table>
+        
+        <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #2f86eb; text-align: center; font-size: 12px; color: #666;">
+          <p><strong>${schoolName}</strong> | ${address}</p>
           <p>Printed: ${now.toLocaleString()}</p>
-          <p>Thank you for your payment!</p>
+          <p>${motto}</p>
         </div>
       </div>
     `;
-    printContent(html, `Receipt_${fee.id || fee._id}`);
+    printContent(html, `Receipt_${fee.id || fee._id}`, settings);
   };
 
-  if (loading) return <div className="text-center py-10">Loading your profile...</div>;
-  
-  if (error) {
-    return (
-      <div className="text-center py-10">
-        <div className="bg-red-100 text-red-700 p-4 rounded-lg mb-4">
-          <p>{error}</p>
-        </div>
-        <button onClick={() => window.location.href = '/portal/login'} className="bg-primary text-white px-4 py-2 rounded-full">
-          Go to Login
-        </button>
-      </div>
-    );
-  }
-
-  if (!profile) return <div className="text-center py-10">No profile data found</div>;
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div className="text-center py-10"><div className="bg-red-100 text-red-700 p-4 rounded-lg">{error}</div><button onClick={() => window.location.href = '/portal/login'} className="btn-primary mt-4">Go to Login</button></div>;
+  if (!profile) return <div>No profile data</div>;
 
   const { portalUser, userData, feeSummary } = profile;
   const isStudent = portalUser.role === 'student';
 
   return (
     <div className="max-w-4xl mx-auto">
-      {/* Fee Structure Button */}
       <div className="flex justify-end mb-4">
-        <Button variant="secondary" onClick={() => setFeeModalOpen(true)}>
-          💰 View Fee Structure
-        </Button>
+        <Button variant="secondary" onClick={() => setFeeModalOpen(true)}>💰 View Fee Structure</Button>
       </div>
 
       <div className="card mb-6">
@@ -154,16 +144,8 @@ export const PortalDashboard = () => {
               </p>
             </div>
           </div>
-          {feeSummary.balance > 0 && (
-            <div className="mt-4 p-3 bg-yellow-100 rounded-lg text-sm text-yellow-800">
-              ⚠️ Outstanding balance: {formatCurrency(feeSummary.balance)}. Please complete your payment.
-            </div>
-          )}
-          {feeSummary.balance === 0 && (
-            <div className="mt-4 p-3 bg-green-100 rounded-lg text-sm text-green-800">
-              ✅ Fully paid! Thank you.
-            </div>
-          )}
+          {feeSummary.balance > 0 && <div className="mt-4 p-3 bg-yellow-100 rounded-lg text-sm text-yellow-800">⚠️ Outstanding balance: {formatCurrency(feeSummary.balance)}. Please complete your payment.</div>}
+          {feeSummary.balance === 0 && <div className="mt-4 p-3 bg-green-100 rounded-lg text-sm text-green-800">✅ Fully paid! Thank you.</div>}
         </div>
       )}
 
@@ -191,13 +173,10 @@ export const PortalDashboard = () => {
       {isStudent && fees.length === 0 && (
         <div className="card">
           <p className="text-gray-500 text-center py-4">No payment history found.</p>
-          {feeSummary?.balance > 0 && (
-            <p className="text-center text-sm text-gray-500">Please visit the admin office to make your payment.</p>
-          )}
+          {feeSummary?.balance > 0 && <p className="text-center text-sm text-gray-500">Please visit the admin office to make your payment.</p>}
         </div>
       )}
 
-      {/* Fee Structure Modal */}
       <FeeStructureModal isOpen={feeModalOpen} onClose={() => setFeeModalOpen(false)} />
     </div>
   );

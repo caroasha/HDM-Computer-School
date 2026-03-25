@@ -8,11 +8,8 @@ const api = axios.create({
 // Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
-    // Try to get admin token first, then portal token
     const adminToken = localStorage.getItem('school_token');
     const portalToken = localStorage.getItem('portal_token');
-    
-    // Use portal token if available, otherwise admin token
     const token = portalToken || adminToken;
     
     if (token) {
@@ -27,8 +24,9 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      // Clear both tokens
+    // Check if error response indicates invalid token
+    if (error.response?.status === 401 && error.response?.data?.clearToken) {
+      // Clear all tokens
       localStorage.removeItem('school_token');
       localStorage.removeItem('school_user');
       localStorage.removeItem('portal_token');
