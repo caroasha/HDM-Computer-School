@@ -1,14 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import api from '../../services/api';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 import { PrintButton } from '../../components/PrintButton';
 import { printContent } from '../../utils/print';
 import { usePortalAuth } from '../../hooks/useAuth';
+import { useSettings } from '../../hooks/useSettings';
 
 export const PortalPayments = () => {
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
   const { user } = usePortalAuth();
+  const { settings } = useSettings();
 
   useEffect(() => {
     const fetchPayments = async () => {
@@ -26,20 +28,18 @@ export const PortalPayments = () => {
   }, [user]);
 
   const printReceipt = (payment) => {
-    const now = new Date();
     const html = `
-      <h1>HDM Computer School</h1>
-      <h2>Payment Receipt</h2>
-      <p><strong>Receipt No:</strong> ${payment._id}</p>
-      <p><strong>Date:</strong> ${formatDate(payment.date)}</p>
-      <p><strong>Amount:</strong> ${formatCurrency(payment.amount)}</p>
-      <p><strong>Balance After:</strong> ${formatCurrency(payment.balanceAfter)}</p>
-      <div class="footer">
-        <p>Printed: ${now.toLocaleString()}</p>
-        <p>Thank you for your patronage. Visit again!</p>
-      </div>
+      <h2>OFFICIAL FEE RECEIPT</h2>
+      <table style="width: 100%; margin: 20px 0;">
+        <tr><td style="padding: 8px;"><strong>Receipt No:</strong></td><td>${payment._id}</td></tr>
+        <tr><td style="padding: 8px;"><strong>Date:</strong></td><td>${formatDate(payment.date)}</td></tr>
+        <tr><td style="padding: 8px;"><strong>Student Name:</strong></td><td>${payment.studentName}</td></tr>
+        <tr><td style="padding: 8px;"><strong>Registration No:</strong></td><td>${payment.regNumber}</td></tr>
+        <tr><td style="padding: 8px;"><strong>Amount Paid:</strong></td><td>${formatCurrency(payment.amount)}</td></tr>
+        <tr><td style="padding: 8px;"><strong>Balance After:</strong></td><td>${formatCurrency(payment.balanceAfter)}</td></tr>
+      </table>
     `;
-    printContent(html, `Receipt_${payment._id}`);
+    printContent(html, `Receipt_${payment._id}`, settings);
   };
 
   if (loading) return <div>Loading...</div>;

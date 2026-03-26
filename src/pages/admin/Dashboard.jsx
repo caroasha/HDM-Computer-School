@@ -5,6 +5,7 @@ import { formatCurrency } from '../../utils/formatters';
 import { Button } from '../../components/Button';
 import { FeeStructureModal } from '../../components/FeeStructureModal';
 import { BrochureModal } from '../../components/BrochureModal';
+import { AdmissionFormModal } from '../../components/AdmissionFormModal';
 import { useSettings } from '../../hooks/useSettings';
 import { useAdminAuth } from '../../hooks/useAuth';
 
@@ -22,6 +23,7 @@ export const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [feeModalOpen, setFeeModalOpen] = useState(false);
   const [brochureModalOpen, setBrochureModalOpen] = useState(false);
+  const [admissionFormModalOpen, setAdmissionFormModalOpen] = useState(false);
   const { settings } = useSettings();
   const { user } = useAdminAuth();
 
@@ -97,7 +99,7 @@ export const Dashboard = () => {
         </div>
       </div>
 
-      {/* Stats Cards – Responsive, no truncation */}
+      {/* Stats Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
         <div className="card text-center hover:shadow-lg transition">
           <p className="text-gray-500 text-sm">Total Students</p>
@@ -160,6 +162,20 @@ export const Dashboard = () => {
               <i className="fas fa-file-alt text-gray-600 text-xl mb-1 block"></i>
               <span className="text-sm">Generate Report</span>
             </Link>
+            <button
+              onClick={() => setFeeModalOpen(true)}
+              className="bg-teal-50 p-3 rounded-lg text-center hover:bg-teal-100 transition"
+            >
+              <i className="fas fa-chart-simple text-teal-600 text-xl mb-1 block"></i>
+              <span className="text-sm">Fee Structure</span>
+            </button>
+            <button
+              onClick={() => setAdmissionFormModalOpen(true)}
+              className="bg-pink-50 p-3 rounded-lg text-center hover:bg-pink-100 transition"
+            >
+              <i className="fas fa-file-alt text-pink-600 text-xl mb-1 block"></i>
+              <span className="text-sm">Admission Form</span>
+            </button>
           </div>
         </div>
 
@@ -195,7 +211,7 @@ export const Dashboard = () => {
         </div>
       </div>
 
-      {/* Recent Transactions – with horizontal scroll on small screens */}
+      {/* Recent Transactions */}
       <div className="card mb-6 overflow-x-auto">
         <div className="flex justify-between items-center mb-3">
           <h3 className="text-lg font-semibold">Recent Transactions</h3>
@@ -211,23 +227,23 @@ export const Dashboard = () => {
                 <th className="p-2 text-left">Description</th>
                 <th className="p-2 text-left">Type</th>
                 <th className="p-2 text-left">Amount</th>
-               </tr>
+                </tr>
             </thead>
             <tbody>
               {recentTransactions.map(tx => (
                 <tr key={tx._id} className="border-t">
-                  <td className="p-2 text-sm">{new Date(tx.date).toLocaleDateString()} </td>
-                  <td className="p-2">{tx.description} </td>
+                  <td className="p-2 text-sm">{new Date(tx.date).toLocaleDateString()}</td>
+                  <td className="p-2">{tx.description}</td>
                   <td className="p-2">
                     <span className={`text-xs px-2 py-1 rounded-full ${
                       tx.type === 'in' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                     }`}>
                       {tx.type === 'in' ? 'Income' : 'Expense'}
                     </span>
-                   </td>
+                  </td>
                   <td className={`p-2 font-semibold ${tx.type === 'in' ? 'text-green-600' : 'text-red-600'}`}>
                     {tx.type === 'in' ? '+' : '-'}{formatCurrency(tx.amount)}
-                   </td>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -235,8 +251,10 @@ export const Dashboard = () => {
         )}
       </div>
 
+      {/* Modals */}
       <FeeStructureModal isOpen={feeModalOpen} onClose={() => setFeeModalOpen(false)} />
       <BrochureModal isOpen={brochureModalOpen} onClose={() => setBrochureModalOpen(false)} />
+      <AdmissionFormModal isOpen={admissionFormModalOpen} onClose={() => setAdmissionFormModalOpen(false)} />
     </div>
   );
 };

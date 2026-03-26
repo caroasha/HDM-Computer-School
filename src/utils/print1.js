@@ -9,22 +9,9 @@ export const printContent = (contentHtml, title = 'Print', settings = null) => {
   const stampImage = settings?.stampImage || '';
   const now = new Date();
 
-  // Format today's date
-  const todayDate = now.toLocaleDateString('en-KE', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  });
-
   const stampHtml = stampImage && stampImage.trim()
-    ? `<div class="stamp">
-        <img src="${stampImage}" alt="Official Stamp" style="max-width: 100px; height: auto;" />
-        <div class="stamp-date">${todayDate}</div>
-       </div>`
-    : `<div class="stamp-placeholder">
-        [Official Stamp]
-        <div class="stamp-date">${todayDate}</div>
-       </div>`;
+    ? `<div class="stamp"><img src="${stampImage}" alt="Official Stamp" style="max-width: 100px; height: auto;" /></div>`
+    : '<div class="stamp-placeholder">[Official Stamp]</div>';
 
   printWindow.document.write(`
     <!DOCTYPE html>
@@ -43,12 +30,25 @@ export const printContent = (contentHtml, title = 'Print', settings = null) => {
           font-family: 'Segoe UI', 'Times New Roman', Arial, sans-serif;
           background: white;
           margin: 0;
+          padding: 0;
+        }
+        /* Main container – kept together on one page if possible */
+        .print-container {
+          max-width: 750px;
+          margin: 0 auto;
           padding: 20px;
+          background: white;
+          page-break-inside: avoid;
+          page-break-after: avoid;
         }
         @media print {
           body {
             margin: 0;
             padding: 0;
+          }
+          .print-container {
+            padding: 0.25in;
+            page-break-inside: avoid;
           }
           .watermark {
             position: fixed;
@@ -71,32 +71,30 @@ export const printContent = (contentHtml, title = 'Print', settings = null) => {
             white-space: nowrap;
             letter-spacing: 4px;
           }
-          header, main, footer {
-            margin: 0 auto;
-            max-width: 750px;
-          }
-          main {
-            page-break-inside: avoid;
-          }
-        }
-        header {
-          text-align: center;
-          margin-bottom: 15px;
         }
         h1 {
           color: #0a2a44;
+          text-align: center;
           border-bottom: 2px solid #2f86eb;
           padding-bottom: 8px;
-          margin-bottom: 8px;
+          margin-bottom: 15px;
           font-size: 20px;
         }
+        h2 {
+          color: #0a2a44;
+          text-align: center;
+          margin: 12px 0;
+          font-size: 18px;
+        }
         .motto {
+          text-align: center;
           font-style: italic;
           margin: 4px 0;
           color: #2f86eb;
           font-size: 12px;
         }
         .address, .contact {
+          text-align: center;
           margin: 4px 0;
           font-size: 12px;
         }
@@ -104,10 +102,6 @@ export const printContent = (contentHtml, title = 'Print', settings = null) => {
           margin: 12px 0;
           border: none;
           border-top: 1px solid #ddd;
-        }
-        main {
-          max-width: 750px;
-          margin: 0 auto;
         }
         table {
           width: 100%;
@@ -124,14 +118,9 @@ export const printContent = (contentHtml, title = 'Print', settings = null) => {
         th {
           background-color: #f2f2f2;
         }
-        footer {
-          max-width: 750px;
-          margin: 20px auto 0;
-          text-align: center;
-          font-size: 10px;
-          color: #666;
-          border-top: 1px solid #2f86eb;
-          padding-top: 12px;
+        .signature {
+          margin-top: 40px;
+          text-align: right;
         }
         .stamp, .stamp-placeholder {
           text-align: right;
@@ -142,46 +131,45 @@ export const printContent = (contentHtml, title = 'Print', settings = null) => {
           height: auto;
         }
         .stamp-placeholder {
-          height: 80px;
+          height: 60px;
           border-top: 1px dashed #999;
           text-align: center;
           padding-top: 12px;
           color: #999;
           font-size: 11px;
         }
-        .stamp-date {
-          font-size: 11px;
-          font-weight: bold;
-          color: #2f86eb;
-          margin-top: 4px;
-          text-align: right;
+        .footer {
+          margin-top: 20px;
+          padding-top: 12px;
+          border-top: 1px solid #2f86eb;
+          text-align: center;
+          font-size: 10px;
+          color: #666;
         }
-        .signature {
-          margin-top: 40px;
-          text-align: right;
+        @media (max-width: 600px) {
+          .print-container { padding: 15px; }
+          h1 { font-size: 18px; }
+          h2 { font-size: 16px; }
+          th, td { padding: 4px; font-size: 10px; }
         }
       </style>
     </head>
     <body>
       <div class="watermark"></div>
-      <header>
+      <div class="print-container">
         <h1>${schoolName}</h1>
         ${motto ? `<div class="motto">${motto}</div>` : ''}
         <div class="address">${address}</div>
         <div class="contact">📞 ${phone} | ✉️ ${email}</div>
         <hr/>
-      </header>
-      <main>
         ${contentHtml}
-      </main>
-      <footer>
         ${stampHtml}
-        <div style="margin-top: 10px;">
+        <div class="footer">
           <p><strong>${schoolName}</strong> | ${address}</p>
           <p>Printed: ${now.toLocaleString()}</p>
           <p>${motto || (settings?.receiptFooterText || 'Thank you for your patronage. Visit again!')}</p>
         </div>
-      </footer>
+      </div>
       <script>
         window.onload = () => {
           setTimeout(() => {
