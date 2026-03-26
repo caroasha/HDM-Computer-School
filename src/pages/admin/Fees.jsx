@@ -48,49 +48,22 @@ export const Fees = () => {
   };
 
   const printReceipt = (fee) => {
-    const now = new Date();
-    const schoolName = settings?.schoolName || 'HDM Computer School';
-    const motto = settings?.motto || 'Technology for Tomorrow';
-    const address = settings?.address || '';
-    const phone = settings?.phone || '';
-    const email = settings?.email || '';
-
     const html = `
-      <div style="max-width: 600px; margin: 0 auto;">
-        <h1>${schoolName}</h1>
-        <p style="text-align: center; font-style: italic;">${motto}</p>
-        <p style="text-align: center;">${address}</p>
-        <p style="text-align: center;">📞 ${phone} | ✉️ ${email}</p>
-        <hr/>
-        <h2>OFFICIAL FEE RECEIPT</h2>
-        
-        <table style="width: 100%; margin: 20px 0;">
-          <tr><td><strong>Receipt No:</strong></td><td>${fee._id}</td></tr>
-          <tr><td><strong>Date:</strong></td><td>${formatDate(fee.date)}</td></tr>
-          <tr><td><strong>Student Name:</strong></td><td>${fee.studentName}</td></tr>
-          <tr><td><strong>Registration No:</strong></td><td>${fee.regNumber}</td></tr>
-          <tr><td><strong>Amount Paid:</strong></td><td style="font-size: 18px; font-weight: bold; color: #2ecc71;">${formatCurrency(fee.amount)}</td></tr>
-          <tr><td><strong>Balance After:</strong></td><td>${formatCurrency(fee.balanceAfter)}</td></tr>
-        </table>
-        
-        <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #2f86eb; text-align: center; font-size: 12px; color: #666;">
-          <p><strong>${schoolName}</strong> | ${address}</p>
-          <p>Printed: ${now.toLocaleString()}</p>
-          <p>${motto}</p>
-        </div>
-      </div>
+      <h2>OFFICIAL FEE RECEIPT</h2>
+      <table style="width: 100%; margin: 20px 0;">
+          <tr><td style="padding: 8px;"><strong>Receipt No:</strong></td><td>${fee._id}</td></tr>
+          <tr><td style="padding: 8px;"><strong>Date:</strong></td><td>${formatDate(fee.date)}</td></tr>
+          <tr><td style="padding: 8px;"><strong>Student Name:</strong></td><td>${fee.studentName}</td></tr>
+          <tr><td style="padding: 8px;"><strong>Registration No:</strong></td><td>${fee.regNumber}</td></tr>
+          <tr><td style="padding: 8px;"><strong>Amount Paid:</strong></td><td style="font-size: 18px; font-weight: bold; color: #2ecc71;">${formatCurrency(fee.amount)}</td></tr>
+          <tr><td style="padding: 8px;"><strong>Balance After:</strong></td><td>${formatCurrency(fee.balanceAfter)}</td></tr>
+      </table>
     `;
     printContent(html, `Receipt_${fee._id}`, settings);
   };
 
   const printFeesReport = () => {
     const now = new Date();
-    const schoolName = settings?.schoolName || 'HDM Computer School';
-    const motto = settings?.motto || 'Technology for Tomorrow';
-    const address = settings?.address || '';
-    const phone = settings?.phone || '';
-    const email = settings?.email || '';
-
     let rows = '';
     students.forEach(s => {
       const totalFee = settings?.courses?.find(c => c.name === s.course)?.totalFee || 0;
@@ -108,39 +81,27 @@ export const Fees = () => {
     });
 
     const html = `
-      <div style="max-width: 800px; margin: 0 auto;">
-        <h1>${schoolName}</h1>
-        <p style="text-align: center; font-style: italic;">${motto}</p>
-        <p style="text-align: center;">${address}</p>
-        <p style="text-align: center;">📞 ${phone} | ✉️ ${email}</p>
-        <hr/>
-        <h2>OFFICIAL FEES REPORT</h2>
-        <p><strong>Generated:</strong> ${now.toLocaleString()}</p>
-        <p><strong>Total Students:</strong> ${students.length}</p>
-        <table style="width: 100%; border-collapse: collapse;">
-          <thead>
-            <tr style="background:#f2f2f2;">
-              <th style="padding: 10px; border: 1px solid #ddd;">Reg No</th>
-              <th style="padding: 10px; border: 1px solid #ddd;">Student Name</th>
-              <th style="padding: 10px; border: 1px solid #ddd;">Course</th>
-              <th style="padding: 10px; border: 1px solid #ddd;">Amount Paid</th>
-              <th style="padding: 10px; border: 1px solid #ddd;">Balance</th>
-              <th style="padding: 10px; border: 1px solid #ddd;">Status</th>
-            </tr>
-          </thead>
-          <tbody>${rows}</tbody>
-        </table>
-        <div style="margin-top: 40px; text-align: center; font-size: 12px;">
-          <p>${schoolName} | ${address}</p>
-          <p>Printed: ${now.toLocaleString()}</p>
-          <p>${motto}</p>
-        </div>
-      </div>
+      <h2>OFFICIAL FEES REPORT</h2>
+      <p><strong>Generated:</strong> ${now.toLocaleString()}</p>
+      <p><strong>Total Students:</strong> ${students.length}</p>
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr style="background:#f2f2f2;">
+            <th style="padding: 10px; border: 1px solid #ddd;">Reg No</th>
+            <th style="padding: 10px; border: 1px solid #ddd;">Student Name</th>
+            <th style="padding: 10px; border: 1px solid #ddd;">Course</th>
+            <th style="padding: 10px; border: 1px solid #ddd;">Amount Paid</th>
+            <th style="padding: 10px; border: 1px solid #ddd;">Balance</th>
+            <th style="padding: 10px; border: 1px solid #ddd;">Status</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
     `;
     printContent(html, 'Fees_Report', settings);
   };
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <div className="text-center py-10">Loading...</div>;
 
   return (
     <div>
@@ -151,7 +112,7 @@ export const Fees = () => {
           <PrintButton onClick={printFeesReport}>Print Report</PrintButton>
         </div>
       </div>
-
+      
       <div className="card mb-6">
         <h2 className="text-xl font-semibold mb-4">Recent Payments</h2>
         {fees.length === 0 ? (
@@ -177,14 +138,20 @@ export const Fees = () => {
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title="Record Fee Payment">
         <form onSubmit={handlePayment}>
           <div className="mb-4">
-            <label className="block mb-1">Select Student</label>
-            <select className="w-full border p-2 rounded" value={selectedStudent?.regNumber || ''} onChange={e => setSelectedStudent(students.find(s => s.regNumber === e.target.value))} required>
+            <label className="block mb-1 font-medium">Select Student</label>
+            <select 
+              className="w-full border p-2 rounded focus:outline-none focus:ring-2 focus:ring-primary" 
+              value={selectedStudent?.regNumber || ''} 
+              onChange={e => setSelectedStudent(students.find(s => s.regNumber === e.target.value))} 
+              required
+            >
               <option value="">Choose student...</option>
               {students.map(s => (
                 <option key={s._id} value={s.regNumber}>{s.regNumber} – {s.name} ({s.course})</option>
               ))}
             </select>
           </div>
+          
           {selectedStudent && (
             <div className="mb-4 p-3 bg-blue-50 rounded-lg">
               <p><strong>Course:</strong> {selectedStudent.course}</p>
@@ -193,10 +160,20 @@ export const Fees = () => {
               <p><strong>Balance:</strong> {formatCurrency((settings?.courses?.find(c => c.name === selectedStudent.course)?.totalFee || 0) - selectedStudent.feesPaid)}</p>
             </div>
           )}
+          
           <div className="mb-6">
-            <label className="block mb-1">Amount (KES)</label>
-            <input type="number" step="any" className="w-full border p-2 rounded" value={amount} onChange={e => setAmount(e.target.value)} placeholder="Enter payment amount" required />
+            <label className="block mb-1 font-medium">Amount (KES)</label>
+            <input 
+              type="number" 
+              step="any"
+              className="w-full border p-2 rounded focus:outline-none focus:ring-2 focus:ring-primary" 
+              value={amount} 
+              onChange={e => setAmount(e.target.value)} 
+              placeholder="Enter payment amount"
+              required 
+            />
           </div>
+          
           <Button type="submit" className="w-full">Record Payment</Button>
         </form>
       </Modal>

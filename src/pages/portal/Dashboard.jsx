@@ -29,6 +29,7 @@ export const PortalDashboard = () => {
 
         const { data } = await api.get('/portal/profile');
         setProfile(data);
+        
         if (data.portalUser.role === 'student' && data.feeSummary) {
           setFees(data.feeSummary.payments || []);
         }
@@ -50,42 +51,21 @@ export const PortalDashboard = () => {
   }, [logout]);
 
   const printReceipt = (fee) => {
-    const now = new Date();
-    const schoolName = settings?.schoolName || 'HDM Computer School';
-    const motto = settings?.motto || 'Technology for Tomorrow';
-    const address = settings?.address || '';
-    const phone = settings?.phone || '';
-    const email = settings?.email || '';
-
     const html = `
-      <div style="max-width: 600px; margin: 0 auto;">
-        <h1>${schoolName}</h1>
-        <p style="text-align: center; font-style: italic;">${motto}</p>
-        <p style="text-align: center;">${address}</p>
-        <p style="text-align: center;">📞 ${phone} | ✉️ ${email}</p>
-        <hr/>
-        <h2>OFFICIAL FEE RECEIPT</h2>
-        
-        <table style="width: 100%; margin: 20px 0;">
-          <tr><td><strong>Receipt No:</strong></td><td>${fee.id || fee._id}</td></tr>
-          <tr><td><strong>Date:</strong></td><td>${formatDate(fee.date)}</td></tr>
-          <tr><td><strong>Student:</strong></td><td>${profile?.userData?.name} (${profile?.portalUser?.regNumber})</td></tr>
-          <tr><td><strong>Amount Paid:</strong></td><td style="font-size: 18px; font-weight: bold; color: #2ecc71;">${formatCurrency(fee.amount)}</td></tr>
-          <tr><td><strong>Balance After:</strong></td><td>${formatCurrency(fee.balanceAfter)}</td></tr>
-          ${fee.notes ? `<tr><td><strong>Notes:</strong></td><td>${fee.notes}</td></tr>` : ''}
-        </table>
-        
-        <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #2f86eb; text-align: center; font-size: 12px; color: #666;">
-          <p><strong>${schoolName}</strong> | ${address}</p>
-          <p>Printed: ${now.toLocaleString()}</p>
-          <p>${motto}</p>
-        </div>
-      </div>
+      <h2>OFFICIAL FEE RECEIPT</h2>
+      <table style="width: 100%; margin: 20px 0;">
+          <tr><td style="padding: 8px;"><strong>Receipt No:</strong></td><td>${fee.id || fee._id}</td></tr>
+          <tr><td style="padding: 8px;"><strong>Date:</strong></td><td>${formatDate(fee.date)}</td></tr>
+          <tr><td style="padding: 8px;"><strong>Student:</strong></td><td>${profile?.userData?.name} (${profile?.portalUser?.regNumber})</td></tr>
+          <tr><td style="padding: 8px;"><strong>Amount Paid:</strong></td><td style="font-size: 18px; font-weight: bold; color: #2ecc71;">${formatCurrency(fee.amount)}</td></tr>
+          <tr><td style="padding: 8px;"><strong>Balance After:</strong></td><td>${formatCurrency(fee.balanceAfter)}</td></tr>
+          ${fee.notes ? `<tr><td style="padding: 8px;"><strong>Notes:</strong></td><td>${fee.notes}</td></tr>` : ''}
+      </table>
     `;
     printContent(html, `Receipt_${fee.id || fee._id}`, settings);
   };
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <div className="text-center py-10">Loading...</div>;
   if (error) return <div className="text-center py-10"><div className="bg-red-100 text-red-700 p-4 rounded-lg">{error}</div><button onClick={() => window.location.href = '/portal/login'} className="btn-primary mt-4">Go to Login</button></div>;
   if (!profile) return <div>No profile data</div>;
 

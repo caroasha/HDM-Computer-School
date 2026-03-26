@@ -7,15 +7,6 @@ import { Modal } from '../../components/Modal';
 import { PrintButton } from '../../components/PrintButton';
 import { printContent } from '../../utils/print';
 
-// Helper function to add months to a date
-const addMonths = (dateStr, months) => {
-  if (!dateStr) return '';
-  const date = new Date(dateStr);
-  if (isNaN(date.getTime())) return '';
-  date.setMonth(date.getMonth() + months);
-  return date.toISOString().split('T')[0];
-};
-
 export const Students = () => {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -28,21 +19,6 @@ export const Students = () => {
   const [availableComputers, setAvailableComputers] = useState([]);
   const [editing, setEditing] = useState(null);
   const { settings } = useSettings();
-
-  // Get course duration when course changes
-  const getCourseDuration = (courseName) => {
-    const course = settings?.courses?.find(c => c.name === courseName);
-    return course?.durationMonths || 3; // default to 3 months
-  };
-
-  // Auto-calculate completion date when enrollment date or course changes
-  useEffect(() => {
-    if (form.enrollmentDate && form.course) {
-      const duration = getCourseDuration(form.course);
-      const completion = addMonths(form.enrollmentDate, duration);
-      setForm(prev => ({ ...prev, completionDate: completion }));
-    }
-  }, [form.enrollmentDate, form.course]);
 
   const fetchStudents = async () => {
     try {
@@ -69,21 +45,33 @@ export const Students = () => {
     fetchAvailableComputers();
   }, []);
 
+  const addMonths = (dateStr, months) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return '';
+    date.setMonth(date.getMonth() + months);
+    return date.toISOString().split('T')[0];
+  };
+
+  const getCourseDuration = (courseName) => {
+    const course = settings?.courses?.find(c => c.name === courseName);
+    return course?.durationMonths || 3;
+  };
+
+  useEffect(() => {
+    if (form.enrollmentDate && form.course) {
+      const duration = getCourseDuration(form.course);
+      const completion = addMonths(form.enrollmentDate, duration);
+      setForm(prev => ({ ...prev, completionDate: completion }));
+    }
+  }, [form.enrollmentDate, form.course]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Validate required fields
     if (!form.name || !form.age || !form.gender || !form.phone || !form.idNumber || !form.enrollmentDate || !form.course) {
       alert('Please fill all required fields');
       return;
     }
-    
-    // Ensure completion date is set
-    if (!form.completionDate) {
-      alert('Please select a course first to auto-calculate completion date');
-      return;
-    }
-    
     try {
       if (editing) {
         await api.put(`/students/${editing._id}`, form);
@@ -134,27 +122,34 @@ export const Students = () => {
   };
 
   const printList = () => {
-    const tableRows = students.map(s => `
+    const rows = students.map(s => `
       <tr>
-        <td>${s.regNumber}</td>
-        <td>${s.name}</td>
-        <td>${s.age}</td>
-        <td>${s.gender}</td>
-        <td>${s.phone}</td>
-        <td>${s.computerAssigned || '-'}</td>
-        <td>${formatCurrency(s.feesPaid)}</td>
-      </tr>
+        <td style="padding: 8px; border: 1px solid #ddd;">${s.regNumber}</td>
+        <td style="padding: 8px; border: 1px solid #ddd;">${s.name}</td>
+        <td style="padding: 8px; border: 1px solid #ddd;">${s.course}</td>
+        <td style="padding: 8px; border: 1px solid #ddd;">${formatCurrency(s.feesPaid)}</td>
+        <td style="padding: 8px; border: 1px solid #ddd;">${s.computerAssigned || '-'}</td>
+       </tr>
     `).join('');
+
     const html = `
-      <h1>Student List</h1>
-      <table border="1" cellpadding="8" cellspacing="0" style="width:100%; border-collapse: collapse;">
+      <h2>OFFICIAL STUDENT LIST</h2>
+      <p><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
+      <p><strong>Total Students:</strong> ${students.length}</p>
+      <table style="width: 100%; border-collapse: collapse;">
         <thead>
-          <tr><th>Reg No</th><th>Name</th><th>Age</th><th>Gender</th><th>Phone</th><th>Computer</th><th>Fees Paid</th></tr>
+          <tr style="background:#f2f2f2;">
+            <th style="padding: 8px; border: 1px solid #ddd;">Reg No</th>
+            <th style="padding: 8px; border: 1px solid #ddd;">Name</th>
+            <th style="padding: 8px; border: 1px solid #ddd;">Course</th>
+            <th style="padding: 8px; border: 1px solid #ddd;">Fees Paid</th>
+            <th style="padding: 8px; border: 1px solid #ddd;">Computer</th>
+           </tr>
         </thead>
-        <tbody>${tableRows}</tbody>
+        <tbody>${rows}</tbody>
       </table>
     `;
-    printContent(html, 'Student_List');
+    printContent(html, 'Student_List', settings);
   };
 
   if (loading) return <div className="text-center py-10">Loading students...</div>;
@@ -199,8 +194,8 @@ export const Students = () => {
                   <td className="p-2">{formatCurrency(s.feesPaid)}</td>
                   <td className="p-2">{s.computerAssigned || '-'}</td>
                   <td className="p-2">
-                    <button onClick={() => openEdit(s)} className="text-blue-600 mr-2 hover:underline">Edit</button>
-                    <button onClick={() => handleDelete(s._id)} className="text-red-600 hover:underline">Delete</button>
+                    <button onClick={() => openEdit(s)} className="text-blue-600 mr-2">Edit</button>
+                    <button onClick={() => handleDelete(s._id)} className="text-red-600">Delete</button>
                   </td>
                 </tr>
               ))}
@@ -214,32 +209,15 @@ export const Students = () => {
           <div className="grid grid-cols-2 gap-3">
             <div className="mb-2">
               <label className="block text-sm font-medium mb-1">Full Name *</label>
-              <input 
-                type="text" 
-                className="w-full border p-2 rounded focus:outline-none focus:ring-2 focus:ring-primary" 
-                value={form.name} 
-                onChange={e => setForm({...form, name: e.target.value})} 
-                required 
-              />
+              <input type="text" className="w-full border p-2 rounded" value={form.name} onChange={e => setForm({...form, name: e.target.value})} required />
             </div>
             <div className="mb-2">
               <label className="block text-sm font-medium mb-1">Age *</label>
-              <input 
-                type="number" 
-                className="w-full border p-2 rounded focus:outline-none focus:ring-2 focus:ring-primary" 
-                value={form.age} 
-                onChange={e => setForm({...form, age: e.target.value})} 
-                required 
-              />
+              <input type="number" className="w-full border p-2 rounded" value={form.age} onChange={e => setForm({...form, age: e.target.value})} required />
             </div>
             <div className="mb-2">
               <label className="block text-sm font-medium mb-1">Gender *</label>
-              <select 
-                className="w-full border p-2 rounded focus:outline-none focus:ring-2 focus:ring-primary" 
-                value={form.gender} 
-                onChange={e => setForm({...form, gender: e.target.value})} 
-                required
-              >
+              <select className="w-full border p-2 rounded" value={form.gender} onChange={e => setForm({...form, gender: e.target.value})} required>
                 <option value="">Select</option>
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
@@ -248,90 +226,39 @@ export const Students = () => {
             </div>
             <div className="mb-2">
               <label className="block text-sm font-medium mb-1">Phone *</label>
-              <input 
-                type="tel" 
-                className="w-full border p-2 rounded focus:outline-none focus:ring-2 focus:ring-primary" 
-                value={form.phone} 
-                onChange={e => setForm({...form, phone: e.target.value})} 
-                required 
-              />
+              <input type="tel" className="w-full border p-2 rounded" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} required />
             </div>
             <div className="mb-2">
               <label className="block text-sm font-medium mb-1">ID Number *</label>
-              <input 
-                type="text" 
-                className="w-full border p-2 rounded focus:outline-none focus:ring-2 focus:ring-primary" 
-                value={form.idNumber} 
-                onChange={e => setForm({...form, idNumber: e.target.value})} 
-                required 
-              />
+              <input type="text" className="w-full border p-2 rounded" value={form.idNumber} onChange={e => setForm({...form, idNumber: e.target.value})} required />
             </div>
             <div className="mb-2">
               <label className="block text-sm font-medium mb-1">Enrollment Date *</label>
-              <input 
-                type="date" 
-                className="w-full border p-2 rounded focus:outline-none focus:ring-2 focus:ring-primary" 
-                value={form.enrollmentDate} 
-                onChange={e => setForm({...form, enrollmentDate: e.target.value})} 
-                required 
-              />
+              <input type="date" className="w-full border p-2 rounded" value={form.enrollmentDate} onChange={e => setForm({...form, enrollmentDate: e.target.value})} required />
             </div>
             <div className="mb-2">
               <label className="block text-sm font-medium mb-1">Course *</label>
-              <select 
-                className="w-full border p-2 rounded focus:outline-none focus:ring-2 focus:ring-primary" 
-                value={form.course} 
-                onChange={e => setForm({...form, course: e.target.value})} 
-                required
-              >
+              <select className="w-full border p-2 rounded" value={form.course} onChange={e => setForm({...form, course: e.target.value})} required>
                 <option value="">Select course</option>
                 {(settings?.courses || []).map((c, i) => (
-                  <option key={i} value={c.name}>
-                    {c.name} ({c.durationMonths} months - {formatCurrency(c.totalFee)})
-                  </option>
+                  <option key={i} value={c.name}>{c.name} ({c.durationMonths} months - {formatCurrency(c.totalFee)})</option>
                 ))}
               </select>
-              {form.course && (
-                <p className="text-xs text-green-600 mt-1">
-                  Completion date will be auto-calculated: {form.completionDate || 'Select enrollment date first'}
-                </p>
-              )}
             </div>
             <div className="mb-2">
               <label className="block text-sm font-medium mb-1">Completion Date</label>
-              <input 
-                type="date" 
-                className="w-full border p-2 rounded bg-gray-100" 
-                value={form.completionDate} 
-                readOnly 
-              />
+              <input type="date" className="w-full border p-2 rounded bg-gray-100" value={form.completionDate} readOnly />
             </div>
             <div className="mb-2">
               <label className="block text-sm font-medium mb-1">Computer</label>
-              <select 
-                className="w-full border p-2 rounded focus:outline-none focus:ring-2 focus:ring-primary" 
-                value={form.computerAssigned} 
-                onChange={e => setForm({...form, computerAssigned: e.target.value})}
-              >
+              <select className="w-full border p-2 rounded" value={form.computerAssigned} onChange={e => setForm({...form, computerAssigned: e.target.value})}>
                 <option value="">None</option>
-                {availableComputers.map(c => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
+                {availableComputers.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
             <div className="mb-4 col-span-2">
               <label className="block text-sm font-medium mb-1">Fees Paid (KES)</label>
-              <input 
-                type="number" 
-                className="w-full border p-2 rounded focus:outline-none focus:ring-2 focus:ring-primary" 
-                value={form.feesPaid} 
-                onChange={e => setForm({...form, feesPaid: parseFloat(e.target.value) || 0})} 
-              />
-              {form.course && (
-                <p className="text-xs text-gray-500 mt-1">
-                  Total fee: {formatCurrency(settings?.courses?.find(c => c.name === form.course)?.totalFee || 0)}
-                </p>
-              )}
+              <input type="number" className="w-full border p-2 rounded" value={form.feesPaid} onChange={e => setForm({...form, feesPaid: parseFloat(e.target.value) || 0})} />
             </div>
           </div>
           <Button type="submit" className="w-full">{editing ? 'Update Student' : 'Enroll Student'}</Button>

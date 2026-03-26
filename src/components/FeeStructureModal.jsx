@@ -14,13 +14,7 @@ export const FeeStructureModal = ({ isOpen, onClose }) => {
   }, [settings]);
 
   const getHTMLContent = () => {
-    const schoolName = settings?.schoolName || 'HDM Computer School';
-    const motto = settings?.motto || 'Technology for Tomorrow';
-    const address = settings?.address || '';
-    const phone = settings?.phone || '';
-    const email = settings?.email || '';
     const now = new Date();
-
     const tableRows = courses.map(c => `
       <tr>
         <td style="padding: 12px; border: 1px solid #ddd;">
@@ -33,11 +27,6 @@ export const FeeStructureModal = ({ isOpen, onClose }) => {
     `).join('');
 
     return `
-      <h1>${schoolName}</h1>
-      <p style="text-align: center; font-style: italic;">${motto}</p>
-      <p style="text-align: center;">${address}</p>
-      <p style="text-align: center;">📞 ${phone} | ✉️ ${email}</p>
-      <hr/>
       <h2>FEE STRUCTURE</h2>
       <p>Effective from: ${now.toLocaleDateString()}</p>
       <table style="width:100%; border-collapse: collapse; margin-top:20px;">
@@ -50,11 +39,6 @@ export const FeeStructureModal = ({ isOpen, onClose }) => {
         </thead>
         <tbody>${tableRows}</tbody>
       </table>
-      <div class="footer">
-        <p><strong>${schoolName}</strong> | ${address}</p>
-        <p>Printed: ${now.toLocaleString()}</p>
-        <p>${motto}</p>
-      </div>
     `;
   };
 

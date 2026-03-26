@@ -9,13 +9,6 @@ export const BrochureModal = ({ isOpen, onClose }) => {
   const courses = settings?.courses || [];
 
   const getHTMLContent = () => {
-    const schoolName = settings?.schoolName || 'HDM Computer School';
-    const motto = settings?.motto || 'Technology for Tomorrow';
-    const address = settings?.address || '';
-    const phone = settings?.phone || '';
-    const email = settings?.email || '';
-    const now = new Date();
-
     const coursesHtml = courses.map(c => `
       <div style="margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #eee;">
         <h3 style="color: #2f86eb; margin-bottom: 8px;">${c.name}</h3>
@@ -26,18 +19,8 @@ export const BrochureModal = ({ isOpen, onClose }) => {
     `).join('');
 
     return `
-      <h1>${schoolName}</h1>
-      <p style="text-align: center; font-style: italic;">${motto}</p>
-      <p style="text-align: center;">${address}</p>
-      <p style="text-align: center;">📞 ${phone} | ✉️ ${email}</p>
-      <hr/>
       <h2>OUR COURSES</h2>
       ${coursesHtml}
-      <div class="footer">
-        <p><strong>${schoolName}</strong> | ${address}</p>
-        <p>Printed: ${now.toLocaleString()}</p>
-        <p>${motto}</p>
-      </div>
     `;
   };
 
