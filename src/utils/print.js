@@ -9,7 +9,6 @@ export const printContent = (contentHtml, title = 'Print', settings = null) => {
   const stampImage = settings?.stampImage || '';
   const now = new Date();
 
-  // Format today's date
   const todayDate = now.toLocaleDateString('en-KE', {
     year: 'numeric',
     month: 'long',
@@ -89,6 +88,12 @@ export const printContent = (contentHtml, title = 'Print', settings = null) => {
           padding-bottom: 8px;
           margin-bottom: 8px;
           font-size: 20px;
+        }
+        h2 {
+          text-align: center;
+          color: #0a2a44;
+          margin: 15px 0 10px;
+          font-size: 18px;
         }
         .motto {
           font-style: italic;
