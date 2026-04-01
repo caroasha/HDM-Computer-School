@@ -6,6 +6,7 @@ import { Button } from '../../components/Button';
 import { FeeStructureModal } from '../../components/FeeStructureModal';
 import { BrochureModal } from '../../components/BrochureModal';
 import { AdmissionFormModal } from '../../components/AdmissionFormModal';
+import { CertificateModal } from '../../components/CertificateModal';
 import { useSettings } from '../../hooks/useSettings';
 import { useAdminAuth } from '../../hooks/useAuth';
 
@@ -24,6 +25,7 @@ export const Dashboard = () => {
   const [feeModalOpen, setFeeModalOpen] = useState(false);
   const [brochureModalOpen, setBrochureModalOpen] = useState(false);
   const [admissionFormModalOpen, setAdmissionFormModalOpen] = useState(false);
+  const [certificateModalOpen, setCertificateModalOpen] = useState(false);
   const { settings } = useSettings();
   const { user } = useAdminAuth();
 
@@ -176,6 +178,13 @@ export const Dashboard = () => {
               <i className="fas fa-file-alt text-pink-600 text-xl mb-1 block"></i>
               <span className="text-sm">Admission Form</span>
             </button>
+            <button
+              onClick={() => setCertificateModalOpen(true)}
+              className="bg-teal-50 p-3 rounded-lg text-center hover:bg-teal-100 transition"
+            >
+              <i className="fas fa-certificate text-teal-600 text-xl mb-1 block"></i>
+              <span className="text-sm">Print Certificate</span>
+            </button>
           </div>
         </div>
 
@@ -227,13 +236,13 @@ export const Dashboard = () => {
                 <th className="p-2 text-left">Description</th>
                 <th className="p-2 text-left">Type</th>
                 <th className="p-2 text-left">Amount</th>
-                </tr>
+               </tr>
             </thead>
             <tbody>
               {recentTransactions.map(tx => (
                 <tr key={tx._id} className="border-t">
-                  <td className="p-2 text-sm">{new Date(tx.date).toLocaleDateString()}</td>
-                  <td className="p-2">{tx.description}</td>
+                  <td className="p-2 text-sm">{new Date(tx.date).toLocaleDateString()} </td>
+                  <td className="p-2">{tx.description} </td>
                   <td className="p-2">
                     <span className={`text-xs px-2 py-1 rounded-full ${
                       tx.type === 'in' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
@@ -255,6 +264,7 @@ export const Dashboard = () => {
       <FeeStructureModal isOpen={feeModalOpen} onClose={() => setFeeModalOpen(false)} />
       <BrochureModal isOpen={brochureModalOpen} onClose={() => setBrochureModalOpen(false)} />
       <AdmissionFormModal isOpen={admissionFormModalOpen} onClose={() => setAdmissionFormModalOpen(false)} />
+      <CertificateModal isOpen={certificateModalOpen} onClose={() => setCertificateModalOpen(false)} />
     </div>
   );
 };
