@@ -10,16 +10,27 @@ export const printContent = (contentHtml, title = 'Print', settings = null, skip
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
-          @page { size: portrait; margin: 0.5in; }
+          @page { size: A4 portrait; margin: 0.2in; }
+          html, body { height: 100%; width: 100%; background: white; }
           body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-family: 'Georgia', 'Times New Roman', serif;
-            background: white;
-            margin: 0;
-            padding: 0;
           }
           .certificate-container {
-            max-width: 100%;
-            margin: 0 auto;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+          .certificate-content {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
           }
           @media print {
             body { margin: 0; padding: 0; }
@@ -27,7 +38,11 @@ export const printContent = (contentHtml, title = 'Print', settings = null, skip
         </style>
       </head>
       <body>
-        <div class="certificate-container">${contentHtml}</div>
+        <div class="certificate-container">
+          <div class="certificate-content">
+            ${contentHtml}
+          </div>
+        </div>
       </body>
       </html>
     `);

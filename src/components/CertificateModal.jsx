@@ -12,6 +12,7 @@ export const CertificateModal = ({ isOpen, onClose }) => {
   const [serialNumber, setSerialNumber] = useState('');
   const [loading, setLoading] = useState(true);
   const [printing, setPrinting] = useState(false);
+  const [stampLoaded, setStampLoaded] = useState(false);
   const { settings } = useSettings();
 
   useEffect(() => {
@@ -27,6 +28,18 @@ export const CertificateModal = ({ isOpen, onClose }) => {
     };
     if (isOpen) fetchStudents();
   }, [isOpen]);
+
+  // Preload stamp image when settings are available
+  useEffect(() => {
+    if (settings?.stampImage) {
+      const img = new Image();
+      img.onload = () => setStampLoaded(true);
+      img.onerror = () => setStampLoaded(true); // fallback even if error
+      img.src = settings.stampImage;
+    } else {
+      setStampLoaded(true);
+    }
+  }, [settings]);
 
   const fetchOrGenerateNumber = async (studentId) => {
     try {
@@ -60,40 +73,78 @@ export const CertificateModal = ({ isOpen, onClose }) => {
     const completionDate = selectedStudent.completionDate ? new Date(selectedStudent.completionDate) : null;
     const formattedCompletion = completionDate ? formatShortDate(completionDate) : 'N/A';
 
+    // Add cache-busting query parameter to stamp image URL
+    const stampUrl = stampImage ? `${stampImage}?t=${Date.now()}` : '';
+
     const html = `
-      <div style="position: relative; text-align: center; border: 12px double #2f86eb; padding: 30px 20px; background: #fffcf5; box-shadow: 0 0 20px rgba(0,0,0,0.1); font-family: 'Georgia', 'Times New Roman', serif; max-width: 800px; margin: 0 auto;">
-        <!-- Watermark -->
-        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.08; font-size: 60px; font-weight: bold; white-space: nowrap; pointer-events: none;">${schoolName}</div>
-        <div style="position: absolute; top: 20px; left: 20px; font-size: 12px; color: #999;">${serialNumber}</div>
-        <div style="margin-bottom: 20px;">
-          <h1 style="font-size: 42px; margin-bottom: 8px; color: #2f86eb;">${schoolName}</h1>
-          <p style="font-size: 16px; font-style: italic;">${motto}</p>
-          <hr style="width: 80px; border: 1px solid #2f86eb; margin: 8px auto;">
+      <div style="
+        position: relative;
+        text-align: center;
+        border: 12px double #2f86eb;
+        padding: 5vh 5vw;
+        background: #fffcf5;
+        box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        font-family: 'Georgia', 'Times New Roman', serif;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        box-sizing: border-box;
+      ">
+        <!-- Slanted Watermark -->
+        <div style="
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%) rotate(-25deg);
+          opacity: 0.08;
+          font-size: 8vw;
+          font-weight: bold;
+          white-space: nowrap;
+          pointer-events: none;
+          color: #000;
+        ">${schoolName}</div>
+        
+        <!-- Serial Number -->
+        <div style="position: absolute; top: 2vh; left: 2vw; font-size: 1.2vh; color: #999;">${serialNumber}</div>
+        
+        <!-- Header -->
+        <div>
+          <h1 style="font-size: 5vh; margin-bottom: 1vh; color: #2f86eb;">${schoolName}</h1>
+          <p style="font-size: 1.8vh; font-style: italic;">${motto}</p>
+          <hr style="width: 10vw; border: 1px solid #2f86eb; margin: 1vh auto;">
         </div>
-        <div style="margin: 30px 0;">
-          <h2 style="font-size: 28px; letter-spacing: 2px; margin-bottom: 15px;">CERTIFICATE OF COMPLETION</h2>
-          <p style="font-size: 18px;">This is to certify that</p>
-          <p style="font-size: 32px; font-weight: bold; margin: 15px 0; text-transform: uppercase;">${selectedStudent.name}</p>
-          <p style="font-size: 18px;">has successfully completed the course</p>
-          <p style="font-size: 24px; font-weight: bold; margin: 15px 0;">${selectedStudent.course}</p>
-          <p style="font-size: 16px;">with effect from ${formattedCompletion}</p>
-          <p style="font-size: 16px; margin-top: 15px;">In witness whereof, we have hereunto set our hand and seal this ${now.toLocaleDateString()}.</p>
+        
+        <!-- Main Content -->
+        <div>
+          <h2 style="font-size: 3.5vh; letter-spacing: 2px; margin-bottom: 2vh;">CERTIFICATE OF COMPLETION</h2>
+          <p style="font-size: 2vh;">This is to certify that</p>
+          <p style="font-size: 4vh; font-weight: bold; margin: 2vh 0; text-transform: uppercase;">${selectedStudent.name}</p>
+          <p style="font-size: 2vh;">has successfully completed the course</p>
+          <p style="font-size: 3vh; font-weight: bold; margin: 2vh 0;">${selectedStudent.course}</p>
+          <p style="font-size: 2vh;">with effect from ${formattedCompletion}</p>
+          <p style="font-size: 2vh; margin-top: 2vh;">In witness whereof, we have hereunto set our hand and seal this ${now.toLocaleDateString()}.</p>
         </div>
-        <div style="margin-top: 50px; display: flex; justify-content: space-between; align-items: flex-end;">
-          <div style="text-align: center; width: 180px;">
-            <div style="border-top: 1px solid #000; width: 160px; margin: 0 auto;"></div>
-            <p style="margin-top: 8px;">Student Signature</p>
+        
+        <!-- Signatures -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 5vh;">
+          <div style="text-align: center; width: 20%;">
+            <div style="border-top: 1px solid #000; width: 100%; margin: 0 auto;"></div>
+            <p style="margin-top: 1vh; font-size: 1.5vh;">Student Signature</p>
           </div>
           <div style="text-align: center;">
-            ${stampImage ? `<img src="${stampImage}" style="width: 90px; height: auto; margin-bottom: 10px;" />` : '<div style="width: 90px; height: 70px; border-top: 1px dashed #999; margin-bottom: 10px;"></div>'}
-            <p>Official Stamp</p>
+            ${stampUrl ? `<img src="${stampUrl}" style="width: 8vh; height: auto; margin-bottom: 1vh;" />` : '<div style="width: 8vh; height: 7vh; border-top: 1px dashed #999; margin-bottom: 1vh;"></div>'}
+            <p style="font-size: 1.5vh;">Official Stamp</p>
           </div>
-          <div style="text-align: center; width: 180px;">
-            <div style="border-top: 1px solid #000; width: 160px; margin: 0 auto;"></div>
-            <p style="margin-top: 8px;">Principal / Director</p>
+          <div style="text-align: center; width: 20%;">
+            <div style="border-top: 1px solid #000; width: 100%; margin: 0 auto;"></div>
+            <p style="margin-top: 1vh; font-size: 1.5vh;">Principal / Director</p>
           </div>
         </div>
-        <div style="margin-top: 30px; font-size: 10px; text-align: center; color: #666;">
+        
+        <!-- Footer -->
+        <div style="margin-top: 3vh; font-size: 1.5vh; text-align: center; color: #666;">
           <p>${schoolName} | ${address} | 📞 ${phone} | ✉️ ${email}</p>
           <p>Issued: ${now.toLocaleString()}</p>
         </div>
