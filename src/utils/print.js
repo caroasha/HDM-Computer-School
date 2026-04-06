@@ -62,8 +62,10 @@ export const printContent = (contentHtml, title = 'Print', settings = null, skip
   const stampImage = settings?.stampImage || '';
   const now = new Date();
 
-  const stampHtml = stampImage && stampImage.trim()
-    ? `<div class="stamp"><img src="${stampImage}" alt="Official Stamp" style="max-width: 100px; height: auto;" /><div class="stamp-date">${now.toLocaleDateString()}</div></div>`
+  // Add cache-busting to stamp image URL
+  const stampUrl = stampImage && stampImage.trim() ? `${stampImage}?t=${Date.now()}` : '';
+  const stampHtml = stampUrl
+    ? `<div class="stamp"><img src="${stampUrl}" alt="Official Stamp" style="max-width: 100px; height: auto;" /><div class="stamp-date">${now.toLocaleDateString()}</div></div>`
     : `<div class="stamp-placeholder">[Official Stamp]<div class="stamp-date">${now.toLocaleDateString()}</div></div>`;
 
   printWindow.document.write(`
